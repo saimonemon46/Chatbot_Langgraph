@@ -1,5 +1,5 @@
 import streamlit as st
-from back import chatbot
+from back import chatbot, retrieve_all_threads
 from langchain_core.messages import HumanMessage, AIMessage
 import uuid
 
@@ -35,7 +35,9 @@ if 'chat_threads' not in st.session_state:
     st.session_state['chat_threads'] = []
 
 if 'thread_titles' not in st.session_state:
-    st.session_state['thread_titles'] = {}
+    threads = retrieve_all_threads()
+    st.session_state['thread_titles'] = {tid: data['title'] for tid, data in threads.items()}
+    st.session_state['chat_threads'] = list(threads.keys())
 
 add_thread_session(st.session_state['thread_id'])
 
@@ -75,7 +77,7 @@ if user_input:
     thread_id = st.session_state['thread_id']
     if st.session_state['thread_titles'].get(thread_id, "New Chat") == "New Chat":
         # take first few words as title
-        title = user_input.strip().split('\n')[0][:50]
+        title = user_input.strip().split('\n')[0][:20]
         st.session_state['thread_titles'][thread_id] = title if title else "New Chat"
 
     # Show user message
